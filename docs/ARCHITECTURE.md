@@ -456,3 +456,4 @@ CREATE INDEX idx_group_members_group ON group_members(group_id);
 - **CORS**: Configurable policies
 
 This architecture provides a solid foundation for a scalable, secure, and maintainable real-time chat application while allowing for future growth and enhancement.
+

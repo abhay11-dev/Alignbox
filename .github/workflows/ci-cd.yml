@@ -213,3 +213,4 @@ jobs:
         run: |
           echo "Pipeline failed. Notifying team..."
           # Add notification logic here (Slack, email, etc.)
+

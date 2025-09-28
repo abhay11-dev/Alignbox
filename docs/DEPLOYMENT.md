@@ -741,3 +741,4 @@ For additional support:
 - **Issues**: [GitHub Issues](https://github.com/yourusername/fun-friday-chat/issues)
 - **Discord**: [Community Server](https://discord.gg/funfridaychat)
 - **Email**: support@funfridaychat.com
+

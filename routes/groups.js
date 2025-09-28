@@ -348,3 +348,4 @@ router.post('/:groupId/leave', checkGroupMembership, asyncHandler(async (req, re
 }));
 
 module.exports = router;
+

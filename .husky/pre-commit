@@ -9,3 +9,4 @@ npm run format:check
 
 # Run tests
 npm test
+

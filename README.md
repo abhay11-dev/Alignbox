@@ -362,3 +362,4 @@ For support, email support@funfridaychat.com or join our Discord server.
 ---
 
 Made with ❤️ by the Fun Friday Team
+
