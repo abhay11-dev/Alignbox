@@ -1,0 +1,40 @@
+:root{
+  --bg:#0f1724;
+  --card:#0b1220;
+  --muted:#9aa4b2;
+  --accent:#5eead4;
+  --accent-2:#60a5fa;
+  --text:#e6eef6;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%;}
+body{
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background:linear-gradient(180deg,#071029 0%, #071827 100%);
+  color:var(--text);
+}
+.app-root{display:flex;flex-direction:column;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:linear-gradient(90deg, rgba(6,10,18,0.8), rgba(8,14,24,0.6));border-bottom:1px solid rgba(255,255,255,0.03)}
+.header .brand{font-weight:700;letter-spacing:0.2px}
+.app-main{padding:20px;flex:1}
+.container{max-width:1100px;margin:0 auto}
+.grid{display:grid;grid-template-columns:320px 1fr;gap:16px}
+.card{background:var(--card);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
+.groups-list{display:flex;flex-direction:column;gap:8px}
+.group-item{display:flex;align-items:center;gap:12px;padding:8px;border-radius:8px;cursor:pointer}
+.group-item:hover{background:rgba(255,255,255,0.02)}
+.group-name{font-weight:600}
+.chat-window{display:flex;flex-direction:column;height:70vh}
+.messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.message{padding:8px 12px;border-radius:10px;max-width:70%}
+.message.mine{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#02203a;align-self:flex-end}
+.message.their{background:rgba(255,255,255,0.03);align-self:flex-start}
+.message .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+.send-box{display:flex;gap:8px;padding:8px;border-top:1px solid rgba(255,255,255,0.03)}
+.input{flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:var(--text)}
+.btn{background:var(--accent);color:#02203a;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+.small{font-size:13px;color:var(--muted)}
+.form{max-width:420px;margin:40px auto;display:flex;flex-direction:column;gap:12px}
+.input-field{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.1);color:var(--text)}
+.link{color:var(--accent-2);text-decoration:none}

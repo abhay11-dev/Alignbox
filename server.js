@@ -39,15 +39,39 @@ const socketHandlers = require('./socket/handlers');
 const app = express();
 const server = http.createServer(app);
 
+// CORS configuration: allow comma-separated origins via CORS_ORIGIN env var
+const rawOrigins = (process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean);
+const allowAll = rawOrigins.length === 0 || rawOrigins.includes('*');
+function corsOriginChecker(origin, callback) {
+    // If no origin (e.g. curl, server-to-server), allow it
+    if (!origin) return callback(null, true);
+    if (allowAll) return callback(null, true);
+    // Allow common local development origins when running in development
+    if (process.env.NODE_ENV === 'development') {
+        try {
+            const devLocalRe = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i;
+            if (devLocalRe.test(origin)) return callback(null, true);
+        } catch (e) {
+            // ignore and continue to strict check below
+        }
+    }
+    if (rawOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+}
+
+// Socket.IO configuration
 // Socket.IO configuration
 const io = socketIo(server, {
     cors: {
-        origin: process.env.CORS_ORIGIN || "*",
+        origin: corsOriginChecker,
         methods: ["GET", "POST"],
         credentials: true
     },
     transports: ['websocket', 'polling']
 });
+
+// Make io available to routes - ADD THIS LINE
+app.set('io', io);
 
 // Trust proxy for accurate IP addresses
 app.set('trust proxy', 1);
@@ -56,7 +80,7 @@ app.set('trust proxy', 1);
 app.use(securityConfig.helmet);
 app.use(compression());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: corsOriginChecker,
     credentials: true
 }));
 
@@ -193,8 +217,8 @@ async function initializeDatabase() {
         const connection = await pool.getConnection();
         
         // Create database if not exists
-        await connection.execute(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || 'chat_app'}`);
-        await connection.execute(`USE ${process.env.DB_NAME || 'chat_app'}`);
+      await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'chat_app'}\``);
+await connection.query(`USE \`${process.env.DB_NAME || 'chat_app'}\``);
 
         // Create tables
         await createTables(connection);

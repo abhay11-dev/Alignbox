@@ -64,19 +64,46 @@ async function authenticateToken(req, res, next) {
     }
 }
 
-// Socket Authentication middleware
-function authenticateSocket(socket, next) {
+// Socket Authentication middleware - FIXED VERSION
+async function authenticateSocket(socket, next) {
     try {
-        const token = socket.handshake.auth.token;
+        let token = socket.handshake.auth.token;
+        
+        console.log('Socket auth - received token:', token ? 'present' : 'missing');
         
         if (!token) {
             return next(new Error('Authentication error: No token provided'));
         }
 
+        // Remove 'Bearer ' prefix if present
+        if (token.startsWith('Bearer ')) {
+            token = token.substring(7);
+            console.log('Socket auth - removed Bearer prefix');
+        }
+
         const decoded = verifyToken(token);
-        socket.user = decoded;
+        console.log('Socket auth - token decoded successfully:', decoded.userId, decoded.username);
+        
+        // Verify user exists in database
+        const [users] = await pool.execute(
+            'SELECT id, username, email, display_name FROM users WHERE id = ?',
+            [decoded.userId]
+        );
+
+        if (users.length === 0) {
+            console.log('Socket auth - user not found in database');
+            return next(new Error('Authentication error: User not found'));
+        }
+
+        socket.user = {
+            ...decoded,
+            ...users[0]
+        };
+        
+        console.log('Socket auth - SUCCESS for user:', socket.user.username);
         next();
     } catch (error) {
+        console.error('Socket authentication error:', error);
         logError('Socket authentication error', error);
         next(new Error('Authentication error: Invalid token'));
     }
@@ -170,4 +197,3 @@ module.exports = {
     checkGroupMembership,
     checkGroupAdmin,
 };
-

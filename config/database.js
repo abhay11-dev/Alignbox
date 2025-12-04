@@ -9,11 +9,12 @@ const dbConfig = {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    acquireTimeout: 60000,
-    timeout: 60000,
-    reconnect: true,
+
+    // VALID timeout option for mysql2
+    connectTimeout: 60000, 
+
     charset: 'utf8mb4',
-    timezone: '+00:00'
+    timezone: 'Z'
 };
 
 // Create connection pool
@@ -47,4 +48,3 @@ module.exports = {
     testConnection,
     closePool
 };
-

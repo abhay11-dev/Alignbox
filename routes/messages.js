@@ -52,6 +52,7 @@ router.get('/:groupId', checkGroupMembership, asyncHandler(async (req, res) => {
 }));
 
 // Send message
+// Send message
 router.post('/:groupId',
     checkGroupMembership,
     securityConfig.validation.message,
@@ -93,10 +94,19 @@ router.post('/:groupId',
 
         const message = messages[0];
 
-        // Emit message to all group members via Socket.IO
+        // Emit message to all group members via Socket.IO (INCLUDING sender)
         const io = req.app.get('io');
         if (io) {
+            // Emit to the entire room INCLUDING the sender
             io.to(`group_${groupId}`).emit('new_message', message);
+            
+            // Also emit directly to all sockets in the room to ensure delivery
+            const socketsInRoom = await io.in(`group_${groupId}`).fetchSockets();
+            console.log(`Broadcasting to ${socketsInRoom.length} sockets in group_${groupId}`);
+            
+            socketsInRoom.forEach(socket => {
+                socket.emit('new_message', message);
+            });
         }
 
         logInfo(`Message sent in group: ${groupId}`, {

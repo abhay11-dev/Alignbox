@@ -1,0 +1,63 @@
+# Multi-stage build for Alignbox Chat Application
+# Stage 1: Build frontend with Vite
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /app/client
+
+# Copy client dependencies
+COPY client/package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy client source
+COPY client ./
+
+# Build frontend
+RUN npm run build
+
+# Stage 2: Backend production dependencies
+FROM node:18-alpine AS backend-builder
+
+WORKDIR /app
+
+# Copy backend dependencies
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production && npm cache clean --force
+
+# Stage 3: Production runtime
+FROM node:18-alpine AS production
+
+# Create app user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# Copy backend production dependencies from backend-builder
+COPY --from=backend-builder /app/node_modules ./node_modules
+
+# Copy backend source
+COPY --chown=nodejs:nodejs . .
+
+# Copy built frontend from frontend-builder
+COPY --from=frontend-builder /app/client/dist ./public
+
+# Create necessary directories
+RUN mkdir -p logs uploads && \
+    chown -R nodejs:nodejs logs uploads public
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+# Start the application
+CMD ["node", "server.js"]

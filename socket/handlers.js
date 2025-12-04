@@ -14,6 +14,9 @@ module.exports = function socketHandlers(io, socket) {
     // Store socket session
     storeSocketSession(socket);
 
+    // Notify all groups that this user came online
+    notifyUserConnection(io, socket);
+
     // Handle typing events
     socket.on('typing_start', (data) => {
         try {
@@ -312,6 +315,32 @@ async function notifyUserDisconnection(socket) {
         });
     } catch (error) {
         logError('Notify user disconnection error', error, {
+            userId: socket.user.userId,
+            username: socket.user.username
+        });
+    }
+}
+
+async function notifyUserConnection(io, socket) {
+    try {
+        // Get all groups user is in
+        const [groups] = await pool.execute(
+            'SELECT group_id FROM group_members WHERE user_id = ?',
+            [socket.user.userId]
+        );
+
+        // Notify each group that user came online
+        groups.forEach(group => {
+            io.to(`group_${group.group_id}`).emit('user_online', {
+                userId: socket.user.userId,
+                username: socket.user.username,
+                displayName: socket.user.displayName,
+                groupId: group.group_id,
+                timestamp: new Date().toISOString()
+            });
+        });
+    } catch (error) {
+        logError('Notify user connection error', error, {
             userId: socket.user.userId,
             username: socket.user.username
         });
